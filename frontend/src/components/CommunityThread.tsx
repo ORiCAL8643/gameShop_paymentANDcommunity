@@ -4,7 +4,6 @@ import {
   Card,
   Avatar,
   Typography,
-  Tag,
   Button,
   Upload,
   Input,
@@ -15,7 +14,6 @@ import {
 } from 'antd';
 import {
   LikeOutlined,
-  DislikeOutlined,
   MessageOutlined,
   UserOutlined,
   PictureOutlined,
@@ -24,17 +22,163 @@ import {
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 
-// ✅ ให้แถบพิมพ์ข้อความกว้างเท่าคอนเทนต์กลาง (ต้องเท่ากับ PAGE_MAX_WIDTH ใน App)
 const FOOTER_MAX_WIDTH_PX = 900;
-
 const { Title, Text } = Typography;
+
+type ThreadComment = {
+  id: number;
+  author: string;
+  content: string;
+  datetime: string;
+  children?: ThreadComment[];
+};
+
+// คอมโพเนนต์คอมเมนต์ (เรนเดอร์แบบซ้อน + ปุ่มตอบกลับที่คอมเมนต์แต่ละตัว)
+const CommentItem = ({
+  data,
+  onReply,
+}: {
+  data: ThreadComment;
+  onReply: (parentId: number, content: string) => void;
+}) => {
+  const [showReplyBox, setShowReplyBox] = useState(false);
+  const [replyText, setReplyText] = useState('');
+
+  const submitReply = () => {
+    const text = replyText.trim();
+    if (!text) return;
+    onReply(data.id, text);
+    setReplyText('');
+    setShowReplyBox(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      submitReply();
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+      <Avatar icon={<UserOutlined />} />
+      <div style={{ flex: 1 }}>
+        {/* กล่องข้อความของคอมเมนต์ (เข้มกว่าเธรดหลัก) */}
+        <div
+          style={{
+            background: '#191a1f',
+            border: '1px solid #2b2b2b',
+            borderRadius: 10,
+            padding: 10,
+          }}
+        >
+          <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+            <Text style={{ color: '#ddd', fontWeight: 500 }}>{data.author}</Text>
+            <span style={{ color: '#888', fontSize: 12 }}>{data.datetime}</span>
+          </div>
+          <div style={{ color: '#ccc', marginTop: 6 }}>{data.content}</div>
+
+          {/* ปุ่มตอบกลับ */}
+          <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+            <Button
+              size="small"
+              type="default"
+              icon={<MessageOutlined />}
+              onClick={() => setShowReplyBox((s) => !s)}
+            >
+              ตอบกลับ
+            </Button>
+          </div>
+
+          {/* กล่องพิมพ์คำตอบ (ย่อย) */}
+          {showReplyBox && (
+            <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+              <Input.TextArea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="พิมพ์คำตอบของคุณ... (Ctrl + Enter เพื่อส่ง)"
+                autoSize={{ minRows: 1, maxRows: 4 }}
+                style={{
+                  background: '#1e1e1e',
+                  color: '#fff',
+                  borderColor: '#303030',
+                  borderRadius: 8,
+                }}
+              />
+              <Space direction="vertical" size="small">
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<SendOutlined />}
+                  onClick={submitReply}
+                  disabled={!replyText.trim()}
+                >
+                  ส่ง
+                </Button>
+                <Button
+                  size="small"
+                  type="text"
+                  onClick={() => {
+                    setShowReplyBox(false);
+                    setReplyText('');
+                  }}
+                >
+                  ยกเลิก
+                </Button>
+              </Space>
+            </div>
+          )}
+        </div>
+
+        {/* ลูก (คอมเมนต์ซ้อน) */}
+        {data.children?.length ? (
+          <div style={{ borderLeft: '1px dashed #303030', marginTop: 10, paddingLeft: 12 }}>
+            {data.children.map((child) => (
+              <CommentItem key={child.id} data={child} onReply={onReply} />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
 
 const CommunityThread = () => {
   const [text, setText] = useState('');
   const [files, setFiles] = useState<UploadFile[]>([]);
   const [sending, setSending] = useState(false);
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  const [showComments, setShowComments] = useState(false);
 
+  // ใช้ state เพื่อให้สามารถเพิ่มคำตอบลงไปได้จริง
+  const [comments, setComments] = useState<ThreadComment[]>([
+    {
+      id: 1,
+      author: 'Alice',
+      content: 'เริ่มจาก RPG เบาๆ เช่น Stardew / Pokémon',
+      datetime: '1 ชม.ที่แล้ว',
+      children: [
+        {
+          id: 11,
+          author: 'Bob',
+          content: 'เห็นด้วยครับ มือใหม่เข้าถึงง่าย',
+          datetime: '55 นาทีที่แล้ว',
+        },
+      ],
+    },
+    {
+      id: 2,
+      author: 'Korn',
+      content: 'ถ้าชอบเนื้อเรื่องเข้ม ลอง FF7 Remake หรือ Persona 5',
+      datetime: '30 นาทีที่แล้ว',
+    },
+  ]);
+
+  // id วิ่งสำหรับคอมเมนต์ใหม่
+  const commentIdRef = useRef(100);
+
+  // กันคอนเทนต์โดนแถบล่างบัง (ความสูงแถบล่างเปลี่ยนได้)
   const footerRef = useRef<HTMLDivElement | null>(null);
   const [footerHeight, setFooterHeight] = useState<number>(120);
   useLayoutEffect(() => {
@@ -47,6 +191,7 @@ const CommunityThread = () => {
     return () => ro.disconnect();
   }, []);
 
+  // helper: สร้าง dataURL สำหรับ preview
   const toDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -80,6 +225,7 @@ const CommunityThread = () => {
       return;
     }
     setSending(true);
+    // TODO: ส่งคอมเมนต์/โพสต์จริงด้วย API
     setTimeout(() => {
       message.success('ส่งเรียบร้อย!');
       setText('');
@@ -95,11 +241,35 @@ const CommunityThread = () => {
     }
   };
 
+  // เพิ่มคำตอบเข้าไปใต้คอมเมนต์ที่มี id = parentId
+  const handleReply = (parentId: number, content: string) => {
+    const newComment: ThreadComment = {
+      id: commentIdRef.current++,
+      author: 'คุณ', // TODO: แทนด้วยชื่อผู้ใช้จริงจาก auth
+      content,
+      datetime: 'เพิ่งตอบกลับ',
+    };
+
+    const appendToTree = (list: ThreadComment[]): ThreadComment[] =>
+      list.map((c) => {
+        if (c.id === parentId) {
+          return { ...c, children: [...(c.children ?? []), newComment] };
+        }
+        if (c.children?.length) {
+          return { ...c, children: appendToTree(c.children) };
+        }
+        return c;
+      });
+
+    setComments((prev) => appendToTree(prev));
+    setShowComments(true);
+    message.success('เพิ่มคำตอบแล้ว');
+  };
+
   return (
     <>
-      {/* ใช้พื้นที่คอนเทนต์กลางจาก App: แค่เว้นที่กันโดนแถบล่างบัง */}
+      {/* พื้นที่คอนเทนต์ (กันถูกแถบล่างบัง) */}
       <div style={{ paddingBottom: footerHeight }}>
-        {/* ถ้าจะมีหลายโพสต์ ให้ครอบด้วย Space vertical เพื่อระยะห่างสม่ำเสมอ */}
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <Card
             style={{ backgroundColor: '#1e1e1e', border: '1px solid #303030', borderRadius: 10 }}
@@ -109,7 +279,8 @@ const CommunityThread = () => {
               <Title level={4} style={{ color: '#fff', marginBottom: 0 }}>
                 สงสัยเกี่ยวกับเกมแนว RPG ควรเริ่มจากตรงไหนก่อนดี?
               </Title>
-              <Tag color="geekblue">RPG</Tag>
+
+              {/* ลบ Tag ออกแล้ว */}
               <Text style={{ color: '#ccc' }}>
                 ผมเพิ่งเริ่มเข้าสู่วงการเกมแนว RPG แต่ไม่รู้จะเริ่มจากเกมไหนดี รบกวนขอคำแนะนำหน่อยครับ :)
               </Text>
@@ -119,17 +290,39 @@ const CommunityThread = () => {
                   <Avatar icon={<UserOutlined />} />
                   <Text style={{ color: '#aaa' }}>by GamerX · 2 ชั่วโมงที่แล้ว</Text>
                 </div>
+
                 <Space>
+                  {/* เหลือแค่ Like */}
                   <Button icon={<LikeOutlined />} shape="circle" />
-                  <Button icon={<DislikeOutlined />} shape="circle" />
-                  <Button icon={<MessageOutlined />} shape="circle" />
+                  {/* ปุ่มคอมเมนต์: toggle แสดง/ซ่อนคอมเมนต์ย่อย */}
+                  <Badge count={comments.length} size="small">
+                    <Button
+                      icon={<MessageOutlined />}
+                      shape="circle"
+                      onClick={() => setShowComments((s) => !s)}
+                    />
+                  </Badge>
                 </Space>
               </Space>
+
+              {/* โซนคอมเมนต์ย่อย — เข้มกว่าเธรดหลัก */}
+              {showComments && (
+                <div
+                  style={{
+                    marginTop: 16,
+                    padding: 12,
+                    border: '1px solid #303030',
+                    background: '#161616',
+                    borderRadius: 12,
+                  }}
+                >
+                  {comments.map((c) => (
+                    <CommentItem key={c.id} data={c} onReply={handleReply} />
+                  ))}
+                </div>
+              )}
             </Space>
           </Card>
-
-          {/* ตัวอย่างการ์ดที่ 2 (ลบได้) เพื่อให้เห็นการเรียงเว้นระยะสวยขึ้นเมื่อไม่มีแถบขวา */}
-          {/* <Card ...> ... </Card> */}
         </Space>
       </div>
 
@@ -183,7 +376,11 @@ const CommunityThread = () => {
                   title={f.name}
                 >
                   {src ? (
-                    <img src={src} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img
+                      src={src}
+                      alt={f.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   ) : (
                     <div style={{ color: '#777', fontSize: 12, padding: 6 }}>{f.name}</div>
                   )}
@@ -256,8 +453,14 @@ const CommunityThread = () => {
         </div>
       </div>
 
-      {/* พรีวิวใหญ่ */}
-      <Modal open={!!previewSrc} onCancel={() => setPreviewSrc(null)} footer={null} centered bodyStyle={{ padding: 0, background: '#000' }}>
+      {/* พรีวิวรูปใหญ่ */}
+      <Modal
+        open={!!previewSrc}
+        onCancel={() => setPreviewSrc(null)}
+        footer={null}
+        centered
+        bodyStyle={{ padding: 0, background: '#000' }}
+      >
         {previewSrc && <img src={previewSrc} style={{ width: '100%', display: 'block' }} alt="preview" />}
       </Modal>
     </>
