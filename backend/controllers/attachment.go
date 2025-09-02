@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"example.com/go-example-api/configs"
-	"example.com/go-example-api/entity"
+	"example.com/sa-gameshop/configs"
+    "example.com/sa-gameshop/entity"
 	"github.com/gin-gonic/gin"
 )
 
