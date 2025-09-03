@@ -1,0 +1,90 @@
+import { useMemo, useRef, useState } from "react";
+import { message, Space } from "antd";
+import ThreadList from "./ThreadList";
+import ThreadDetail from "./ThreadDetail";
+import type { Thread, ThreadComment } from "./types";
+
+export default function CommunityPage() {
+  // --- mock data เริ่มต้น ---
+  const [threads, setThreads] = useState<Thread[]>([
+    {
+      id: 1,
+      title: "How high can we count before EA does something…?",
+      body: "Rules: Just be respectful.",
+      author: "neurougue",
+      createdAt: "3 ชม.ที่แล้ว",
+      likes: 2,
+      comments: [
+        { id: 11, author: "Yanis_zaky", content: "1", datetime: "3 ชม. @ 8:17am" },
+        { id: 12, author: "MaT", content: "2", datetime: "3 ชม. @ 5:06pm" },
+      ],
+    },
+    {
+      id: 2,
+      title: "For 1001st time MM is a joke",
+      body: "…",
+      author: "Sil Halcorrn",
+      createdAt: "8 ชม.ที่แล้ว",
+      likes: 1,
+      comments: [],
+    },
+  ]);
+  // --------------------------
+
+  const idRef = useRef(1000);
+  const [activeId, setActiveId] = useState<number | null>(null);
+
+  const activeThread = useMemo(
+    () => threads.find((t) => t.id === activeId) || null,
+    [threads, activeId]
+  );
+
+  // สร้างเธรดใหม่ (หน้า List เท่านั้น)
+  const createThread = ({ title, body, images }: { title: string; body: string; images?: string[] }) => {
+  const n: Thread = {
+    id: idRef.current++,
+    title,
+    body,
+    author: "คุณ",
+    createdAt: "เพิ่งโพสต์",
+    likes: 0,
+    comments: [],
+    images, // ✅ เก็บรูปไปกับเธรด
+  };
+  setThreads((prev) => [n, ...prev]);
+  message.success("สร้างเธรดใหม่แล้ว");
+};
+
+  // เพิ่มคอมเมนต์ที่ระดับ root ของเธรดที่เปิดอยู่ (หน้า Detail เท่านั้น)
+  const replyRoot = ({ content }: { content: string }) => {
+    if (!activeThread) return;
+    const newC: ThreadComment = {
+      id: idRef.current++,
+      author: "คุณ",
+      content,
+      datetime: "เพิ่งตอบกลับ",
+    };
+    setThreads((prev) =>
+      prev.map((t) => (t.id === activeThread.id ? { ...t, comments: [...t.comments, newC] } : t))
+    );
+    message.success("ตอบกลับแล้ว");
+  };
+
+  return (
+    <Space direction="vertical" size="large" style={{ width: "100%" }}>
+      {activeThread ? (
+        <ThreadDetail
+          thread={activeThread}
+          onBack={() => setActiveId(null)}
+          onReplyRoot={replyRoot}
+        />
+      ) : (
+        <ThreadList
+          threads={threads}
+          onOpen={(id) => setActiveId(id)}
+          onCreate={createThread}
+        />
+      )}
+    </Space>
+  );
+}
