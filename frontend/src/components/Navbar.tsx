@@ -1,7 +1,11 @@
 import { Input, Avatar, Space, Button } from 'antd';
 import { SearchOutlined, ShoppingCartOutlined, BellOutlined } from '@ant-design/icons';
 
-const Navbar = () => {
+interface NavbarProps {
+  onLogin?: () => void;
+}
+
+const Navbar = ({ onLogin }: NavbarProps) => {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', background: '#1f1f1f' }}>
       <Input
@@ -13,7 +17,7 @@ const Navbar = () => {
         <BellOutlined style={{ color: 'white', fontSize: '18px' }} />
         <ShoppingCartOutlined style={{ color: 'white', fontSize: '18px' }} />
         <Avatar src="https://i.pravatar.cc/300" />
-        <Button type="primary">Login</Button>
+        <Button type="primary" onClick={onLogin}>Login</Button>
       </Space>
     </div>
   );

@@ -1,16 +1,15 @@
 // src/App.tsx
 import { useState } from "react";
-import { Layout, Menu, Input, Avatar, Badge, Button } from "antd";
+import { Layout, Menu } from "antd";
 import {
   UserOutlined,
   SearchOutlined,
   HeartOutlined,
   AppstoreAddOutlined,
-  BellOutlined,
-  ShoppingCartOutlined,
   WechatOutlined,
   CreditCardOutlined,
 } from "@ant-design/icons";
+import Navbar from "./components/Navbar";
 
 // ✅ ใช้หน้าใหม่แทน CommunityThread เดิม
 import CommunityPage from "./pages/Community/CommunityPage";
@@ -34,7 +33,6 @@ export default function App() {
       case "payment":
         return <PaymentPage />;
       case "login":
-        return <LoginPage />;
         return <LoginPage onSignup={() => setActivePage("signup")} />;
       case "signup":
         return <SignupPage />;
@@ -95,24 +93,8 @@ export default function App() {
 
       {/* CONTENT */}
       <Layout>
-        <Header
-          style={{
-            background: "#111",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingInline: 20,
-          }}
-        >
-          <Input prefix={<SearchOutlined />} placeholder="ค้นหา..." style={{ maxWidth: 400 }} />
-          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-            <Badge count={2}>
-              <BellOutlined style={{ fontSize: 20, color: "#fff" }} />
-            </Badge>
-            <ShoppingCartOutlined style={{ fontSize: 20, color: "#fff" }} />
-            <Avatar src="https://i.pravatar.cc/150?img=3" />
-            <Button type="primary" onClick={() => setActivePage("login")}>Login</Button>
-          </div>
+        <Header style={{ background: "#111", paddingInline: 0 }}>
+          <Navbar onLogin={() => setActivePage("login")} />
         </Header>
 
         <Content style={{ padding: 24, background: "#1e1e2f", flex: 1 }}>{renderPage()}</Content>
