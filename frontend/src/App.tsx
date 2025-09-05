@@ -17,6 +17,7 @@ import CommunityPage from "./pages/Community/CommunityPage";
 // ปรับเส้นทางให้ตรงกับไฟล์ของคุณ (ถ้าคุณวางไว้ที่ src/pages/PaymentPage.tsx)
 import PaymentPage from './components/Payment';
 import LoginPage from "./pages/Login";
+import SignupPage from "./pages/Signup";
 
 import "./styles/community-dark.css";
 
@@ -24,7 +25,9 @@ import "./styles/community-dark.css";
 const { Header, Sider, Content } = Layout;
 
 export default function App() {
-  const [activePage, setActivePage] = useState<"community" | "payment" | "login">("community");
+  const [activePage, setActivePage] = useState<
+    "community" | "payment" | "login" | "signup"
+  >("community");
 
   const renderPage = () => {
     switch (activePage) {
@@ -32,6 +35,10 @@ export default function App() {
         return <PaymentPage />;
       case "login":
         return <LoginPage />;
+        return <LoginPage onSignup={() => setActivePage("signup")} />;
+      case "signup":
+        return <SignupPage />;
+        
       case "community":
       default:
         return <CommunityPage />;
