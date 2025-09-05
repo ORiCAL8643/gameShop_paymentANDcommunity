@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useState } from "react";
-import { Layout, Menu, Input, Avatar, Badge } from "antd";
+import { Layout, Menu, Input, Avatar, Badge, Button } from "antd";
 import {
   UserOutlined,
   SearchOutlined,
@@ -16,6 +16,7 @@ import {
 import CommunityPage from "./pages/Community/CommunityPage";
 // ปรับเส้นทางให้ตรงกับไฟล์ของคุณ (ถ้าคุณวางไว้ที่ src/pages/PaymentPage.tsx)
 import PaymentPage from './components/Payment';
+import LoginPage from "./pages/Login";
 
 import "./styles/community-dark.css";
 
@@ -23,12 +24,14 @@ import "./styles/community-dark.css";
 const { Header, Sider, Content } = Layout;
 
 export default function App() {
-  const [activePage, setActivePage] = useState<"community" | "payment">("community");
+  const [activePage, setActivePage] = useState<"community" | "payment" | "login">("community");
 
   const renderPage = () => {
     switch (activePage) {
       case "payment":
         return <PaymentPage />;
+      case "login":
+        return <LoginPage />;
       case "community":
       default:
         return <CommunityPage />;
@@ -101,6 +104,7 @@ export default function App() {
             </Badge>
             <ShoppingCartOutlined style={{ fontSize: 20, color: "#fff" }} />
             <Avatar src="https://i.pravatar.cc/150?img=3" />
+            <Button type="primary" onClick={() => setActivePage("login")}>Login</Button>
           </div>
         </Header>
 
