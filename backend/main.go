@@ -78,6 +78,59 @@ func main() {
 		router.GET("/notifications/:id", controllers.FindNotificationByID)
 		router.PUT("/notifications/:id", controllers.UpdateNotification)
 		router.DELETE("/notifications/:id", controllers.DeleteNotificationByID)
+
+		// Roles
+		router.POST("/roles", controllers.CreateRole)
+		router.GET("/roles", controllers.FindRoles)
+		router.GET("/roles/:id", controllers.FindRoleByID)
+		router.PUT("/roles/:id", controllers.UpdateRole)
+		router.DELETE("/roles/:id", controllers.DeleteRole)
+
+		// Orders
+		router.POST("/orders", controllers.CreateOrder)
+		router.GET("/orders", controllers.FindOrders)
+		router.GET("/orders/:id", controllers.FindOrderByID)
+		router.PUT("/orders/:id", controllers.UpdateOrder)
+		router.DELETE("/orders/:id", controllers.DeleteOrder)
+
+		// OrderItems
+		router.POST("/order-items", controllers.CreateOrderItem)
+		router.GET("/order-items", controllers.FindOrderItems)
+		router.PUT("/order-items/:id", controllers.UpdateOrderItem)
+		router.DELETE("/order-items/:id", controllers.DeleteOrderItem)
+
+		// GameKeys
+		router.POST("/game-keys", controllers.CreateGameKey)
+		router.GET("/game-keys", controllers.FindGameKeys)
+		router.DELETE("/game-keys/:id", controllers.DeleteGameKey)
+
+		// Payments
+		router.POST("/payments", controllers.CreatePayment)
+		router.GET("/payments", controllers.FindPayments)
+		router.PUT("/payments/:id", controllers.UpdatePayment)
+		router.DELETE("/payments/:id", controllers.DeletePayment)
+
+		// PaymentSlips
+		router.POST("/payment-slips", controllers.CreatePaymentSlip)
+		router.GET("/payment-slips", controllers.FindPaymentSlips)
+		router.DELETE("/payment-slips/:id", controllers.DeletePaymentSlip)
+
+		// PaymentReviews
+		router.POST("/payment-reviews", controllers.CreatePaymentReview)
+		router.GET("/payment-reviews", controllers.FindPaymentReviews)
+		router.DELETE("/payment-reviews/:id", controllers.DeletePaymentReview)
+
+		// Promotions
+		router.POST("/promotions", controllers.CreatePromotion)
+		router.GET("/promotions", controllers.FindPromotions)
+		router.GET("/promotions/:id", controllers.FindPromotionByID)
+		router.PUT("/promotions/:id", controllers.UpdatePromotion)
+		router.DELETE("/promotions/:id", controllers.DeletePromotion)
+
+		// OrderPromotions
+		router.POST("/order-promotions", controllers.CreateOrderPromotion)
+		router.GET("/order-promotions", controllers.FindOrderPromotions)
+		router.DELETE("/order-promotions/:id", controllers.DeleteOrderPromotion)
 	}
 
 	// Run the server
