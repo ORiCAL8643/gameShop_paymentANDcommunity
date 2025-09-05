@@ -34,9 +34,11 @@ export default function App() {
       case "payment":
         return <PaymentPage />;
       case "login":
+        return <LoginPage />;
         return <LoginPage onSignup={() => setActivePage("signup")} />;
       case "signup":
         return <SignupPage />;
+        
       case "community":
       default:
         return <CommunityPage />;
