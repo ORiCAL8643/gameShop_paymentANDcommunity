@@ -1,4 +1,4 @@
-import { Input, Avatar, Space } from 'antd';
+import { Input, Avatar, Space, Button } from 'antd';
 import { SearchOutlined, ShoppingCartOutlined, BellOutlined } from '@ant-design/icons';
 
 const Navbar = () => {
@@ -13,6 +13,7 @@ const Navbar = () => {
         <BellOutlined style={{ color: 'white', fontSize: '18px' }} />
         <ShoppingCartOutlined style={{ color: 'white', fontSize: '18px' }} />
         <Avatar src="https://i.pravatar.cc/300" />
+        <Button type="primary">Login</Button>
       </Space>
     </div>
   );
